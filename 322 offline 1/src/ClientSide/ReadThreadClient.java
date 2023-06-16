@@ -26,7 +26,6 @@ public class ReadThreadClient implements Runnable {
                 Scanner in=new Scanner(System.in);
                 Object o = networkUtil.read();///unread message read from server
                 if(o instanceof String && (((String) o).startsWith("Services")||((String) o).startsWith("*"))){
-                    System.out.println("hi");
                     System.out.println(o);
                 }
                 else if(o instanceof String && ((String) o).startsWith("log out")){
@@ -93,15 +92,11 @@ public class ReadThreadClient implements Runnable {
                     String savePath = "src/ClientSide/folders/"+name+"/"+tokens[1]; // Local path to save the downloaded file
 
                     try {
-                        System.out.println("omg5");
                         // Get the input stream from the socket
                         InputStream inputStream = networkUtil.getSocket().getInputStream();
-                        System.out.println("omg1");
                         // Create a file output stream to save the downloaded file
                         FileOutputStream fileOutputStream = new FileOutputStream(savePath);
-                        System.out.println("omg2");
                         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
-                        System.out.println("omg3");
                         // Read data from the input stream and write it to the output stream
                         byte[] buffer = new byte[4096];
                         int bytesRead;
@@ -111,10 +106,8 @@ public class ReadThreadClient implements Runnable {
                             if(bytesRead<4096){
                                 break;
                             }
-                            System.out.println("loop");
                         }
                         bufferedOutputStream.flush();
-                        System.out.println("omg4");
                         // Close the streams and socket
                         bufferedOutputStream.close();
                         fileOutputStream.close();
@@ -161,12 +154,15 @@ public class ReadThreadClient implements Runnable {
                 }
             }
         } catch (Exception e) {
-            System.out.println("accept");
-            e.printStackTrace();
-            System.out.println("A client is online with the same user name");
+//            System.out.println("accept");
+//            e.printStackTrace();
+            if(this.available)
+                System.out.println("A client is online with the same user name.\nPress any key to log out");
+            else
+                System.out.println("User has logged out.\nPress any key to log out");
         } finally {
             try {
-                System.out.println("thread shesh");
+//                System.out.println("thread shesh");
                 networkUtil.closeConnection();
             } catch (IOException e) {
                 e.printStackTrace();

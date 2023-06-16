@@ -93,13 +93,13 @@ public class WriteThreadClient implements Runnable {
 //                }
             }
         } catch (Exception e) {
-            System.out.println("A client is online with the same user name");
+//            System.out.println("A client is online with the same user name");
 //            e.printStackTrace();
         } finally {
             try {
                 networkUtil.closeConnection();
             } catch (IOException e) {
-                System.out.println("A client is online with the same user name");
+//                System.out.println("A client is online with the same user name");
 //                e.printStackTrace();
             }
         }

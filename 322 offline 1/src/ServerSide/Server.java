@@ -17,10 +17,7 @@ public class Server {
     public ArrayList<String> clients;
     public HashMap<String,ClientInfo> requests;
     Server() {
-        clients=new ArrayList<>();//hardcoded
-//        clients.add("a");
-//        clients.add("b");
-//        clients.add("c");
+        clients=new ArrayList<>();
         clientMap = new HashMap<>();
         requests=new HashMap<>();
         try {
@@ -39,20 +36,20 @@ public class Server {
         NetworkUtil networkUtil=null;
         try{
             networkUtil = new NetworkUtil(clientSocket);
-            String service="Services provided:\n"+"a. Look up the list of clients connected to the server\n"
-                    +"b. Look up your list of uploaded files, both private and public\n"
-                    +"c. Download your files, to download write in this format: c,file_name\n"
-                    +"d. Look up the public files of other users\n"
-                    +"e. Download the public files of other users\n"
-                    +"f. Make a file request\n"
-                    +"g. Read unread messages\n"
-                    +"h. Upload a file\n"
-                    +"i. Go offline\n";
+            String service="Services provided:\n"+"a. Write 'a' to look up the list of clients connected to the server\n"
+                    +"b. Write 'b' to look up your list of uploaded files, both private and public\n"
+                    +"c. Write 'c,file_name' to download your files\n"
+                    +"d. Write 'd' to look up the public files of other users\n"
+                    +"e. Write 'e,user_name,file_name' to download the public files of other users\n"
+                    +"f. Write 'f,description' to make a file request\n"
+                    +"g. Write 'g' to read unread messages\n"
+                    +"h. Write 'h,file_name,file_size,public/private,request_id(if any)' to upload a file\n"
+//                    +"i. Write 'i' to see all the request id's\n"
+                    +"i. Write 'i' to go offline\n";
             ClientInfo c=null;
             String clientName = (String) networkUtil.read();
             if(clients.contains(clientName)){
                 if(!clientMap.get(clientName).available){
-                    System.out.println("at least here");
                     clientMap.get(clientName).available=true;
                     clientMap.get(clientName).util=networkUtil;
                     c=new ClientInfo(clientName,"src/ServerSide/folders/"+clientName,networkUtil);

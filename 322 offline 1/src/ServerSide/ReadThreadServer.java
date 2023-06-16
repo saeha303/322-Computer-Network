@@ -33,9 +33,7 @@ public class ReadThreadServer implements Runnable {
 
                 Object o = client.util.read();//far more complicated, chunk by chunk
                 System.out.println(client.util);
-                System.out.println("i got "+o);
                 if(o instanceof String && o.equals("a")){
-                    System.out.println("asteso?");
                     String s="* marked users are currently online\n";
                     for (Map.Entry<String, ClientInfo> entry : clientMap.entrySet()) {
                         String key = entry.getKey();
@@ -46,7 +44,6 @@ public class ReadThreadServer implements Runnable {
                     client.util.write(s);
                 }
                 if(o instanceof String && o.equals("b")){
-                    System.out.println("nai");
                     String directoryPath = client.folderPath; // Specify the directory path
 
                     // Create a File object representing the directory
@@ -76,9 +73,8 @@ public class ReadThreadServer implements Runnable {
                         System.out.println("Directory does not exist or is not a directory.");
                     }
                 }
-                if(o instanceof String && (((String) o).contains("c,"))){
+                if(o instanceof String && (((String) o).startsWith("c,"))){
                     client.util.write(o);
-                    System.out.println("oml1");
                     String[] tokens=((String) o).split(",");
                     String filePath = "src/ServerSide/folders/"+client.name+"/"+tokens[1]; // Path of the file to be sent
 
@@ -86,7 +82,6 @@ public class ReadThreadServer implements Runnable {
 //                        while (true) {
                             // Create a file input stream to read the file
                             File file = new File(filePath);
-                            System.out.println("oml2");
                             FileInputStream fileInputStream = new FileInputStream(file);
 
                             // Get the output stream from the socket
@@ -97,12 +92,12 @@ public class ReadThreadServer implements Runnable {
                             int bytesRead;
                             while ((bytesRead = fileInputStream.read(buffer)) != -1) {
                                 outputStream.write(buffer, 0, bytesRead);
-                                System.out.println("loop");
                             }
 
                             // Close the streams and socket
 //                            outputStream.close();
                             fileInputStream.close();
+                            System.out.println("in c");
                             System.out.println("File sent successfully.");//works
 //                        }
                     } catch (IOException e) {
@@ -167,6 +162,7 @@ public class ReadThreadServer implements Runnable {
                         // Close the streams and socket
 //                            outputStream.close();
                         fileInputStream.close();
+                        System.out.println("in e");
                         System.out.println("File sent successfully.");//works
 //                        }
                     } catch (IOException e) {
@@ -175,14 +171,7 @@ public class ReadThreadServer implements Runnable {
                 }
                 if(o instanceof String && ((String) o).startsWith("f,")){//f,description
                     String[] tokens=((String) o).split(",");
-                    for (Map.Entry<String, ClientInfo> client : clientMap.entrySet()){
-                        String key=client.getKey();
-                        ClientInfo value=client.getValue();
-                        if(!key.equals(this.client.name)){
-                            value.messages.add(tokens[1]);
-                            System.out.println(value.messages.size());
-                        }
-                    }
+
                     int length = 10; // Length of the random string
                     String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
                     Random random = new Random();
@@ -193,20 +182,28 @@ public class ReadThreadServer implements Runnable {
                         char randomChar = characters.charAt(randomIndex);
                         sb.append(randomChar);
                     }
-                    requests.put(sb.toString(),client);
+                    String request_id=sb.toString();
+                    requests.put(request_id,client);
+                    for (Map.Entry<String, ClientInfo> client : clientMap.entrySet()){
+                        String key=client.getKey();
+                        ClientInfo value=client.getValue();
+                        if(!key.equals(this.client.name)){
+                            value.messages.add(tokens[1]+"\nThe request id is "+request_id+"\n");
+                        }
+                    }
                 }
                 if(o instanceof String && o.equals("g")){
                     ArrayList<String> list=client.messages;
-                    String s="These messages will disappear right after you have seen them";
+                    String s="These messages will disappear right after you have seen them\n";
                     for(int i=0;i<list.size();i++){
                         s+="-";
                         s+=list.get(i);
                     }
                     client.util.write(s);
-                    client.removeMessages();
+//                    client.removeMessages();
                 }
                 if(o instanceof String && ((String) o).startsWith("h,")){//h,file name, file size,public/private,request_id
-                    System.out.println("r u here");
+                    System.out.println("h ei aschi");
                     client.util.write(o);
                     String[] tokens=((String) o).split(",");
                     String savePath = "src/ServerSide/folders/"+client.name+"/"+tokens[1]; // Local path to save the uploaded file
@@ -245,7 +242,6 @@ public class ReadThreadServer implements Runnable {
                             while ((bytesRead = inputStream.read(buffer)) != -1) {
                                 // Write each chunk to the output stream
                                 sum+=bytesRead;
-                                System.out.println("loop server "+bytesRead);
                                 bufferedOutputStream.write(buffer, 0, bytesRead);
                                 client.util.write("chunk received");
                                 Object msg=client.util.read();
@@ -262,7 +258,6 @@ public class ReadThreadServer implements Runnable {
                             if(!timeout){
                                 client.util.read();
                             }
-                            System.out.println("ekhaneo");
                             // Close the streams and socket
                             bufferedOutputStream.close();
                             fileOutputStream.close();
@@ -304,9 +299,15 @@ public class ReadThreadServer implements Runnable {
                         System.out.println("The server buffer is full");
                     }
                 }
+//                if(o instanceof String && o.equals("i")){
+//                    for (Map.Entry<String, ClientInfo> entry : requests.entrySet()){
+//
+//                    }
+//                }
                 if(o instanceof String && o.equals("i")){
                     client.available=false;
-//                    client.util.write("log out");
+                    clientMap.get(client.name).available=false;
+                    client.util.write("log out");
                     client.util.closeConnection();
                 }
             }
