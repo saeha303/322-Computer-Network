@@ -48,21 +48,41 @@ public class ReadThreadClient implements Runnable {
                         // Create a buffer for reading chunks of data
                         Object line=networkUtil.read();
                         String[] tokens2=((String)line).split(",");
-                        byte[] buffer = new byte[chunkSize];
+                        byte[] buffer = new byte[Integer.parseInt(tokens2[0])];
 
                         // Create an output stream to send data to the server
                         OutputStream outputStream = networkUtil.getSocket().getOutputStream();
 
                         // Read and send the file in chunks
                         int bytesRead;
+                        boolean timeout=false;
                         while ((bytesRead = bufferedInputStream.read(buffer)) != -1) {
                             // Write each chunk to the output stream
                             outputStream.write(buffer, 0, bytesRead);
+                            long startTime = System.currentTimeMillis();
+                            Object ack=networkUtil.read();
+                            long endTime = System.currentTimeMillis();
+                            long delayInSeconds = (endTime - startTime) / 1000;
+                            if(ack.equals("chunk received") && delayInSeconds>30){
+                                timeout=true;
+                                networkUtil.write("timed out");//timeout message
+                                break;
+                            }else if(ack.equals("chunk received") && delayInSeconds<=30){
+                                networkUtil.write("not timed out");
+                            }
+                        }
+
+                        if(!timeout){
+                            networkUtil.write("File uploaded successfully.");//completion message
                         }
                         bufferedInputStream.close();
 //                        outputStream.close();
-
-                        System.out.println("File uploaded successfully.");//works
+                        Object msg=networkUtil.read();
+                        if(msg.equals("File saved successfully."))
+                            System.out.println("File uploaded successfully.");//works
+                        else if(msg.equals("File not saved.")){
+                            System.out.println("File upload error: ");
+                        }
                     } catch (IOException e) {
                         System.out.println("File upload error: " + e.getMessage());
                     }

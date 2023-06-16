@@ -1,11 +1,11 @@
 package ServerSide;
 
-import tcpforward.Client;
-import tcpforward.Message;
-import util.NetworkUtil;
+
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 //we need hashmap here
@@ -205,7 +205,7 @@ public class ReadThreadServer implements Runnable {
                     client.util.write(s);
                     client.removeMessages();
                 }
-                if(o instanceof String && ((String) o).startsWith("h,")){//h,file name, file size,request_id
+                if(o instanceof String && ((String) o).startsWith("h,")){//h,file name, file size,public/private,request_id
                     System.out.println("r u here");
                     client.util.write(o);
                     String[] tokens=((String) o).split(",");
@@ -240,22 +240,40 @@ public class ReadThreadServer implements Runnable {
 
                             // Read and save the file in chunks
                             int bytesRead;
+                            boolean timeout=false;
+                            int sum=0;
                             while ((bytesRead = inputStream.read(buffer)) != -1) {
                                 // Write each chunk to the output stream
+                                sum+=bytesRead;
                                 System.out.println("loop server "+bytesRead);
                                 bufferedOutputStream.write(buffer, 0, bytesRead);
+                                client.util.write("chunk received");
+                                Object msg=client.util.read();
+                                if(msg.equals("timed out")){
+                                    timeout=true;
+                                    Files.delete(Path.of(savePath));
+                                    break;
+                                }
                                 if(bytesRead<chunkSize){
                                     break;
                                 }
                             }
                             bufferedOutputStream.flush();
+                            if(!timeout){
+                                client.util.read();
+                            }
                             System.out.println("ekhaneo");
                             // Close the streams and socket
                             bufferedOutputStream.close();
                             fileOutputStream.close();
 //                            inputStream.close();
-
-                            System.out.println("File saved successfully.");//doesn't work
+                            if(sum==Integer.parseInt(tokens[2])){
+                                client.util.write("File saved successfully.");//doesn't work
+                            }
+                            else {
+                                client.util.write("File not saved.");
+                                Files.delete(Path.of(savePath));
+                            }
                             if (tokens[3].equals("public")) {
                                 File file = new File(savePath);
                                 file.setReadable(true, false);
@@ -273,9 +291,9 @@ public class ReadThreadServer implements Runnable {
                             }
                             bufferSize-=Integer.parseInt(tokens[2]);
 //                        }
-                            if(tokens.length==4){
-                                if(requests.containsKey(tokens[3])){
-                                    requests.get(tokens[3]).messages.add("here is your requested file from "+client.name);
+                            if(tokens.length==5){
+                                if(requests.containsKey(tokens[4])){
+                                    requests.get(tokens[4]).messages.add("here is your requested file from "+client.name);
                                 }
                             }
                         } catch (IOException e) {
