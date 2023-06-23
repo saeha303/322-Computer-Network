@@ -34,13 +34,10 @@ public class NetworkUtil {
         return socket;
     }
 
-    public void setSocket(Socket socket) {
-        this.socket = socket;
-    }
-
     public void closeConnection() throws IOException {
         ois.close();
         oos.close();
     }
+
 }
 

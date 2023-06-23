@@ -1,7 +1,6 @@
 package ClientSide;
 
 import util.NetworkUtil;
-
 import java.util.Scanner;
 
 public class Client {

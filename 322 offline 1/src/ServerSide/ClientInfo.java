@@ -10,6 +10,8 @@ public class ClientInfo {
     String folderPath;
     NetworkUtil util;
     ArrayList<String>  messages=new ArrayList<>();
+
+
     ClientInfo(String n, String f, NetworkUtil u){
         this.name=n;
         this.folderPath=f;
@@ -18,5 +20,16 @@ public class ClientInfo {
     }
     void removeMessages(){
         messages.clear();
+    }
+
+    @Override
+    public String toString() {
+        return "ClientInfo{" +
+                "name='" + name + '\'' +
+                ", available=" + available +
+                ", folderPath='" + folderPath + '\'' +
+                ", util=" + util +
+                ", messages=" + messages +
+                '}';
     }
 }
